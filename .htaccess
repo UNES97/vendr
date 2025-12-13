@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Remov index.php from URL
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L]
+
+    # Optional: Prevent access to system and application folders
+    RewriteRule ^(system|application) - [F,L,NC]
+</IfModule>
+
+# Optional: Set default charset
+AddDefaultCharset UTF-8
+
+# Optional: Disable directory browsing
+Options -Indexes
