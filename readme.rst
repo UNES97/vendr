@@ -1,71 +1,105 @@
-###################
-What is CodeIgniter
-###################
+Vendr
+=====
 
-CodeIgniter is an Application Development Framework - a toolkit - for people
-who build web sites using PHP. Its goal is to enable you to develop projects
-much faster than you could if you were writing code from scratch, by providing
-a rich set of libraries for commonly needed tasks, as well as a simple
-interface and logical structure to access these libraries. CodeIgniter lets
-you creatively focus on your project by minimizing the amount of code needed
-for a given task.
+Vendr is an open-source Point of Sale (POS) and inventory management system
+designed for restaurants. It supports order processing, inventory control,
+kitchen display, table management, online ordering and reporting.
 
-*******************
-Release Information
-*******************
+Badges
+------
+.. image:: https://img.shields.io/github/stars/UNES97/vendr?style=social
+   :target: https://github.com/UNES97/vendr
+.. image:: https://img.shields.io/github/license/UNES97/vendr
+   :target: https://github.com/UNES97/vendr/blob/main/LICENSE
+.. image:: https://img.shields.io/badge/Framework-CodeIgniter%203-red
+   :target: https://codeigniter.com/
+.. image:: https://img.shields.io/badge/Technology-PHP%20%7C%20MySQL%20%7C%20TailwindCSS-blue
+   :target: https://vendr-app.vercel.app/
 
-This repo contains in-development code for future releases. To download the
-latest stable release please visit the `CodeIgniter Downloads
-<https://codeigniter.com/download>`_ page.
+Quick Summary
+-------------
+- Framework: CodeIgniter 3 (MVC)
+- Backend: PHP 7.2+
+- Database: MySQL 5.6+
+- Frontend: TailwindCSS
+- Additional: Endroid QR Code, Picqer Barcode, TCPDF
 
-**************************
-Changelog and New Features
-**************************
+Features
+--------
+- Point of Sale (POS): multi-order types (Dine-in, Takeaway, Delivery), multiple payments, discounts.
+- Inventory Control: stock tracking, SKU & barcode generation, low-stock alerts.
+- Kitchen Display System (KDS): real-time order updates and status workflow.
+- Table Management: QR table ordering, real-time table status, sections.
+- Menu & Recipe Management: recipes, ingredient tracking, cost calculations.
+- Online Ordering: public order submission, delivery management, minimum order rules.
+- Staff & User Management: role-based access (Admin, Manager, Cashier, Chef, Waiter), shifts.
+- Reports & Analytics: sales, revenue, payment breakdowns, inventory and monthly comparisons.
+- Expense Management: categorized expenses, attachments, date filters.
+- QR Code Menu: generate QR codes per table for contactless menus.
 
-You can find a list of all changes for each release in the `user
-guide change log <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/changelog.rst>`_.
+Getting Started
+---------------
 
-*******************
-Server Requirements
-*******************
+Prerequisites
+~~~~~~~~~~~~~
+- PHP 7.2+
+- MySQL 5.6+
+- Apache or Nginx
+- Composer
+- (Optional for local macOS dev) MAMP
 
-PHP version 5.6 or newer is recommended.
-
-It should work on 5.3.7 as well, but we strongly advise you NOT to run
-such old versions of PHP, because of potential security and performance
-issues, as well as missing features.
-
-************
 Installation
-************
+~~~~~~~~~~~~
 
-Please see the `installation section <https://codeigniter.com/userguide3/installation/index.html>`_
-of the CodeIgniter User Guide.
+1. Clone the repository
+   .. code-block:: bash
 
-*******
+       git clone https://github.com/UNES97/vendr.git
+       cd vendr
+
+2. Create database and import schema
+   .. code-block:: bash
+
+       # Adjust credentials as needed (MAMP default MySQL user is usually 'root' with no password)
+       mysql -u root -p -e "CREATE DATABASE vendr"
+       mysql -u root -p vendr < db/pos_db.sql
+
+3. Configure the application
+   .. code-block:: bash
+
+       cp application/config/database.php.example application/config/database.php
+       # Edit application/config/database.php with your DB credentials
+       # Edit application/config/config.php and set $config['base_url']
+
+4. Install PHP dependencies
+   .. code-block:: bash
+
+       composer install
+
+5. Start the server
+   - Using MAMP: place the vendr folder in your htdocs (e.g., /Applications/MAMP/htdocs/vendr) and start Apache/MySQL.
+   - Or use built-in PHP server for quick testing (not for production):
+     .. code-block:: bash
+
+         php -S localhost:8000 -t .
+
+Default Credentials
+-------------------
+- Email: admin@restaurant.local
+- Password: 123456
+
+Security note: Change the default credentials immediately after first login.
+
+Development / Contribution
+--------------------------
+Contributions are welcome. Please open issues or pull requests on the GitHub repository.
+See the CONTRIBUTING guide in the repo for details.
+
 License
-*******
+-------
+Vendr is licensed under the MIT License. See the LICENSE file for details.
 
-Please see the `license
-agreement <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/license.rst>`_.
-
-*********
-Resources
-*********
-
--  `User Guide <https://codeigniter.com/docs>`_
--  `Contributing Guide <https://github.com/bcit-ci/CodeIgniter/blob/develop/contributing.md>`_
--  `Language File Translations <https://github.com/bcit-ci/codeigniter3-translations>`_
--  `Community Forums <http://forum.codeigniter.com/>`_
--  `Community Wiki <https://github.com/bcit-ci/CodeIgniter/wiki>`_
--  `Community Slack Channel <https://codeigniterchat.slack.com>`_
-
-Report security issues to our `Security Panel <mailto:security@codeigniter.com>`_
-or via our `page on HackerOne <https://hackerone.com/codeigniter>`_, thank you.
-
-***************
-Acknowledgement
-***************
-
-The CodeIgniter team would like to thank EllisLab, all the
-contributors to the CodeIgniter project and you, the CodeIgniter user.
+Contact
+-------
+Built by restaurant operators for restaurant operators.
+Project: https://github.com/UNES97/vendr
