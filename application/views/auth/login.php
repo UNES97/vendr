@@ -108,18 +108,6 @@
                     </button>
                 </form>
 
-                <!-- Demo Login -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <p class="text-center text-sm text-gray-600 mb-4">Demo Credentials</p>
-                    <button
-                        type="button"
-                        onclick="document.getElementById('email').value='demo@restaurant.local'; document.getElementById('password').value='demo123';"
-                        class="w-full px-4 py-2 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:border-gray-400 hover:bg-gray-50 transition"
-                    >
-                        <i class="fas fa-user-circle"></i> Use Demo Account
-                    </button>
-                </div>
-
                 <!-- Admin Note -->
                 <p class="text-center text-sm text-gray-500 mt-6">
                     Contact your administrator for account creation
