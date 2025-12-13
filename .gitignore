@@ -36,3 +36,5 @@ application/config/database.php
 
 
 uploads/*
+**_OLD*
+landing/
