@@ -52,7 +52,7 @@ class Pos extends CI_Controller {
             'order_number' => $this->generate_order_number(),
             'customer_name' => $this->input->post('customer_name'),
             'customer_phone' => $this->input->post('customer_phone'),
-            'table_id' => $this->input->post('table_id'),
+            'table_id' => (int)$this->input->post('table_id') ?: null,
             'order_type' => $this->input->post('order_type') ?: 'dine-in',
             'subtotal' => 0,
             'tax_amount' => 0,
