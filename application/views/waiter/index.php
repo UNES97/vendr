@@ -70,10 +70,15 @@
                         $statusDot = 'bg-green-500';
                         $statusText = 'Available';
                         $clickable = false;
-                    } elseif ($status === 'ready' && $paymentStatus === 'pending') {
-                        $bgColor = 'bg-gradient-to-br from-orange-900 to-orange-800 border-orange-600 hover:border-orange-500';
-                        $statusDot = 'bg-orange-500';
-                        $statusText = 'Awaiting Payment';
+                    } elseif ($status === 'served') {
+                        $bgColor = 'bg-gradient-to-br from-red-900 to-red-800 border-red-600 hover:border-red-500';
+                        $statusDot = 'bg-red-500';
+                        $statusText = 'Served - Awaiting Payment';
+                        $clickable = true;
+                    } elseif ($status === 'ready') {
+                        $bgColor = 'bg-gradient-to-br from-yellow-900 to-yellow-800 border-yellow-600 hover:border-yellow-500';
+                        $statusDot = 'bg-yellow-500';
+                        $statusText = 'Ready to Serve';
                         $clickable = true;
                     } elseif ($status === 'preparing') {
                         $bgColor = 'bg-gradient-to-br from-purple-900 to-purple-800 border-purple-600 hover:border-purple-500';
@@ -121,6 +126,12 @@
                                 <span class="text-xs text-gray-400">Amount</span>
                                 <span class="text-sm font-bold text-green-400"><?php echo get_currency(); ?> <?php echo number_format($table['total_amount'], 0); ?></span>
                             </div>
+                            <?php if (!empty($table['session_start'])): ?>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-400">In use</span>
+                                    <span class="table-timer text-sm font-bold text-white" data-start-time="<?php echo $table['session_start']; ?>">--:--:--</span>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Quick Action Buttons -->
@@ -201,6 +212,14 @@
                 Payment
             </button>
             <button
+                onclick="closeAndPayTable()"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition flex items-center gap-2 text-sm"
+                id="close-pay-btn"
+            >
+                <i class="fas fa-dollar-sign"></i>
+                Close & Pay
+            </button>
+            <button
                 onclick="closeTableModal()"
                 class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition text-sm"
             >
@@ -220,6 +239,39 @@ setInterval(updateTime, 1000);
 function updateTime() {
     const now = new Date();
     document.getElementById('current-time').textContent = now.toLocaleTimeString();
+}
+
+// Update table timers every second
+setInterval(updateTableTimers, 1000);
+
+function updateTableTimers() {
+    document.querySelectorAll('.table-timer').forEach(timer => {
+        const startTime = timer.getAttribute('data-start-time');
+        if (!startTime) return;
+
+        const start = new Date(startTime);
+        const now = new Date();
+        const elapsed = Math.floor((now - start) / 1000); // seconds
+
+        if (elapsed < 0) return;
+
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+
+        const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        timer.textContent = formatted;
+
+        // Color coding based on duration
+        timer.classList.remove('text-green-400', 'text-yellow-400', 'text-red-400', 'text-white');
+        if (elapsed < 1800) { // < 30 minutes
+            timer.classList.add('text-green-400');
+        } else if (elapsed < 3600) { // 30-60 minutes
+            timer.classList.add('text-yellow-400');
+        } else { // > 60 minutes
+            timer.classList.add('text-red-400');
+        }
+    });
 }
 
 // Show table details modal
@@ -325,19 +377,24 @@ function renderTableDetails(order) {
     const serveBtn = document.getElementById('serve-btn');
     const readyBtn = document.getElementById('ready-btn');
     const paymentBtn = document.getElementById('payment-btn');
+    const closePayBtn = document.getElementById('close-pay-btn');
 
-    if (order.order_status === 'ready' && order.payment_status === 'pending') {
-        serveBtn.style.display = 'flex';
-        readyBtn.style.display = 'none';
-        paymentBtn.style.display = 'flex';
+    // Hide all buttons first
+    serveBtn.style.display = 'none';
+    readyBtn.style.display = 'none';
+    paymentBtn.style.display = 'none';
+    closePayBtn.style.display = 'none';
+
+    if (order.order_status === 'served') {
+        // Order has been served, show Close & Pay button
+        closePayBtn.style.display = 'flex';
     } else if (order.order_status === 'ready') {
+        // Order is ready to be served
         serveBtn.style.display = 'flex';
-        readyBtn.style.display = 'none';
-        paymentBtn.style.display = 'none';
+        paymentBtn.style.display = 'flex';
     } else {
-        serveBtn.style.display = 'none';
+        // Order is still being prepared
         readyBtn.style.display = 'flex';
-        paymentBtn.style.display = 'none';
     }
 }
 
@@ -382,7 +439,37 @@ function markTableAsReady(tableId) {
 function markTableAsServed() {
     if (!currentTableId) return;
 
-    if (!confirm('Mark this table as served and close it?')) {
+    if (!confirm('Mark this order as served?')) {
+        return;
+    }
+
+    // Get the order ID first
+    const billUrl = '<?php echo base_url('waiter/get_table_bill/'); ?>' + currentTableId;
+    fetch(billUrl)
+        .then(response => response.json())
+        .then(order => {
+            if (!order.id) {
+                alert('Order not found');
+                return;
+            }
+            // Update order status to served (not completed)
+            const url = '<?php echo base_url('waiter/update_order_status/'); ?>' + order.id + '/served';
+            return fetch(url).then(res => res.json());
+        })
+        .then(data => {
+            closeTableModal();
+            refreshTables();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to mark as served');
+        });
+}
+
+function closeAndPayTable() {
+    if (!currentTableId) return;
+
+    if (!confirm('Close this table and mark as paid?')) {
         return;
     }
 
@@ -476,6 +563,16 @@ function updateTablesDisplay(tables) {
         `;
 
         if (hasOrder) {
+            let timerHtml = '';
+            if (table.session_start) {
+                timerHtml = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-400">In use</span>
+                        <span class="table-timer text-sm font-bold text-white" data-start-time="${table.session_start}">--:--:--</span>
+                    </div>
+                `;
+            }
+
             contentHtml += `
                 <div class="bg-gray-900 bg-opacity-60 rounded p-3 mb-3 space-y-2">
                     <div class="flex justify-between items-center">
@@ -486,6 +583,7 @@ function updateTablesDisplay(tables) {
                         <span class="text-xs text-gray-400">Amount</span>
                         <span class="text-sm font-bold text-green-400">${CURRENCY} ${Math.round(table.total_amount)}</span>
                     </div>
+                    ${timerHtml}
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">

@@ -9,6 +9,7 @@ class Tables extends CI_Controller {
         $this->load->helper('url');
         $this->load->library('session');
         $this->load->model('Table_model');
+        $this->load->model('Table_usage_session_model');
 
         // Require login and admin access
         require_login();
@@ -36,7 +37,21 @@ class Tables extends CI_Controller {
         $data['user_email'] = user_email();
         $data['user_initial'] = get_user_initials();
 
-        $data['tables'] = $this->Table_model->get_all();
+        $tables = $this->Table_model->get_all();
+
+        // Add usage info for each table
+        foreach ($tables as &$table) {
+            if ($table['status'] == 'occupied') {
+                $session = $this->Table_usage_session_model->get_active_session($table['id']);
+                $table['session_start'] = $session ? $session->session_start : null;
+            } else {
+                $table['session_start'] = null;
+            }
+            // Set last_available_at for idle calculation
+            $table['last_available_at'] = isset($table['last_available_at']) ? $table['last_available_at'] : null;
+        }
+
+        $data['tables'] = $tables;
         $data['total_tables'] = count($data['tables']);
         $data['available_tables'] = count($this->Table_model->get_available());
         $data['occupied_tables'] = count($this->Table_model->get_occupied());

@@ -12,6 +12,8 @@ class Pos extends CI_Controller {
         $this->load->model('Meal_model');
         $this->load->model('Order_model');
         $this->load->model('Category_model');
+        $this->load->model('Table_model');
+        $this->load->model('Table_usage_session_model');
         $this->check_access();
     }
 
@@ -83,6 +85,18 @@ class Pos extends CI_Controller {
 
             // Update order totals
             $this->update_order_totals($order_id);
+
+            // Start table usage tracking for dine-in orders
+            if ($order_data['order_type'] == 'dine-in' && !empty($order_data['table_id'])) {
+                // Calculate idle time before this session
+                $idle_minutes = $this->Table_usage_session_model->calculate_idle_time($order_data['table_id']);
+
+                // Start new session
+                $this->Table_usage_session_model->start_session($order_data['table_id'], $order_id, $idle_minutes);
+
+                // Auto-update table status to occupied
+                $this->Table_model->update($order_data['table_id'], ['status' => 'occupied']);
+            }
 
             $this->session->set_flashdata('success', 'Order created successfully. Order #' . $order_data['order_number']);
         } else {

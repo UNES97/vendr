@@ -202,6 +202,10 @@
                                 <i class="fas fa-chart-pie w-4"></i>
                                 <span x-show="sidebarOpen">Expenses</span>
                             </a>
+                            <a href="<?php echo base_url('reports/table_usage'); ?>" class="flex items-center space-x-3 px-8 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                                <i class="fas fa-table w-4"></i>
+                                <span x-show="sidebarOpen">Table Usage</span>
+                            </a>
                         </div>
                     </div>
 

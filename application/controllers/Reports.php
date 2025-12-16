@@ -9,6 +9,8 @@ class Reports extends CI_Controller {
         $this->load->helper('url');
         $this->load->library('session');
         $this->load->library('roles');
+        $this->load->model('Table_model');
+        $this->load->model('Table_usage_session_model');
 
         // Require login for all report methods
         require_login();
@@ -417,6 +419,58 @@ class Reports extends CI_Controller {
             'critical_stock_count' => $critical_stock,
             'total_inventory_value' => $total_cost
         ]);
+    }
+
+    /**
+     * Table Usage Report
+     */
+    public function table_usage()
+    {
+        $data['page_title'] = 'Table Usage Report';
+        $data['tables'] = $this->Table_model->get_all();
+        $data['sections'] = $this->Table_model->get_distinct_sections();
+
+        $this->load->view('layouts/base', [
+            'content' => $this->load->view('reports/table_usage', $data, true),
+            'page_title' => $data['page_title'],
+        ]);
+    }
+
+    /**
+     * AJAX: Get table usage data
+     */
+    public function get_table_usage_data()
+    {
+        header('Content-Type: application/json');
+
+        $start_date = $this->input->post('start_date') ?: date('Y-m-d', strtotime('-7 days'));
+        $end_date = $this->input->post('end_date') ?: date('Y-m-d');
+        $table_id = $this->input->post('table_id') ?: null;
+        $section = $this->input->post('section') ?: null;
+
+        // Ensure dates include full day
+        $start_date .= ' 00:00:00';
+        $end_date .= ' 23:59:59';
+
+        $data = [
+            'summary' => $this->Table_usage_session_model->get_summary($start_date, $end_date, $table_id, $section),
+            'most_used' => $this->Table_usage_session_model->get_most_used_tables($start_date, $end_date, 10, $section),
+            'peak_hours' => $this->Table_usage_session_model->get_peak_hours($start_date, $end_date, $table_id, $section),
+            'table_details' => $this->Table_usage_session_model->get_all_table_stats($start_date, $end_date, $section)
+        ];
+
+        echo json_encode($data);
+    }
+
+    /**
+     * AJAX: Get table detail history
+     */
+    public function get_table_detail($table_id)
+    {
+        header('Content-Type: application/json');
+
+        $sessions = $this->Table_usage_session_model->get_table_sessions($table_id, 30);
+        echo json_encode($sessions);
     }
 
     private function check_access()

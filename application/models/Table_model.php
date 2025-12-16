@@ -133,4 +133,19 @@ class Table_model extends CI_Model {
             ->get($this->table)
             ->result_array();
     }
+
+    /**
+     * Get distinct sections (for filtering in reports)
+     */
+    public function get_distinct_sections()
+    {
+        return $this->db->select('section')
+            ->where('deleted_at', NULL)
+            ->where('section IS NOT NULL')
+            ->where('section !=', '')
+            ->group_by('section')
+            ->order_by('section', 'ASC')
+            ->get($this->table)
+            ->result_array();
+    }
 }

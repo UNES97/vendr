@@ -733,3 +733,32 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+CREATE TABLE IF NOT EXISTS table_usage_sessions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  table_id INT NOT NULL,
+  order_id INT NULL,
+  session_start TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  session_end TIMESTAMP NULL,
+  duration_minutes INT NULL,
+  idle_before_minutes INT NULL,
+  was_cancelled BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (table_id) REFERENCES tables(id) ON DELETE CASCADE,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+  INDEX idx_table_id (table_id),
+  INDEX idx_session_start (session_start),
+  INDEX idx_order_id (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Migration: Add last_available_at field to tables
+-- Description: Track when a table last became available for idle time calculation
+-- Created: 2025-12-16
+
+ALTER TABLE tables
+ADD COLUMN last_available_at TIMESTAMP NULL AFTER status;

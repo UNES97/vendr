@@ -11,6 +11,8 @@ class Waiter extends CI_Controller {
         $this->load->library('roles');
         $this->load->model('Order_model');
         $this->load->model('Meal_model');
+        $this->load->model('Table_model');
+        $this->load->model('Table_usage_session_model');
         $this->check_access();
     }
 
@@ -58,6 +60,10 @@ class Waiter extends CI_Controller {
                     ->get()
                     ->row_array();
                 $table['item_count'] = $item_count['quantity'] ?? 0;
+
+                // Get session start time for timer
+                $session = $this->Table_usage_session_model->get_active_session($table['id']);
+                $table['session_start'] = $session ? $session->session_start : null;
             } else {
                 $table['order_id'] = null;
                 $table['order_number'] = null;
@@ -65,6 +71,7 @@ class Waiter extends CI_Controller {
                 $table['total_amount'] = null;
                 $table['payment_status'] = null;
                 $table['item_count'] = 0;
+                $table['session_start'] = null;
             }
         }
 
@@ -158,6 +165,10 @@ class Waiter extends CI_Controller {
                     ->get()
                     ->row_array();
                 $table['item_count'] = $item_count['quantity'] ?? 0;
+
+                // Get session start time for timer
+                $session = $this->Table_usage_session_model->get_active_session($table['id']);
+                $table['session_start'] = $session ? $session->session_start : null;
             } else {
                 $table['order_id'] = null;
                 $table['order_number'] = null;
@@ -165,6 +176,7 @@ class Waiter extends CI_Controller {
                 $table['total_amount'] = null;
                 $table['payment_status'] = null;
                 $table['item_count'] = 0;
+                $table['session_start'] = null;
             }
         }
 
@@ -198,8 +210,14 @@ class Waiter extends CI_Controller {
 
         // Update order status to completed
         if ($this->Order_model->update($order['id'], ['order_status' => 'completed', 'payment_status' => 'completed'])) {
-            // Update table status to available
-            $this->db->update('tables', ['status' => 'available'], ['id' => $table_id]);
+            // End the table usage session
+            $this->Table_usage_session_model->end_session($table_id, $order['id']);
+
+            // Update table status to available and set last_available_at
+            $this->Table_model->update($table_id, [
+                'status' => 'available',
+                'last_available_at' => date('Y-m-d H:i:s')
+            ]);
 
             echo json_encode(['status' => 'success', 'message' => 'Table closed successfully']);
         } else {

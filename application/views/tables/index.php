@@ -76,13 +76,14 @@
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Capacity</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Location</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Usage Status</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($tables)): ?>
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <i class="fas fa-table text-5xl text-gray-300 mb-3"></i>
                                     <p class="text-gray-500 text-lg">No tables configured</p>
@@ -122,6 +123,21 @@
                                         <?php echo ucfirst($table['status']); ?>
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <?php if ($table['status'] == 'occupied' && !empty($table['session_start'])): ?>
+                                        <span class="table-timer-badge px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium" data-start-time="<?php echo $table['session_start']; ?>">
+                                            In use: --
+                                        </span>
+                                    <?php elseif ($table['status'] == 'available' && !empty($table['last_available_at'])): ?>
+                                        <span class="idle-timer-badge px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium" data-idle-time="<?php echo $table['last_available_at']; ?>">
+                                            Idle: --
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                                            N/A
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center space-x-2">
                                         <a href="<?php echo base_url('tables/edit/' . $table['id']); ?>" class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition" title="Edit Table">
@@ -140,3 +156,47 @@
         </div>
     </div>
 </div>
+
+<script>
+// Update table usage timers every minute
+setInterval(updateTableTimers, 60000);
+
+// Initial update
+updateTableTimers();
+
+function updateTableTimers() {
+    const now = new Date();
+
+    // Update occupied table timers (In use)
+    document.querySelectorAll('.table-timer-badge').forEach(badge => {
+        const startTime = badge.getAttribute('data-start-time');
+        if (!startTime) return;
+
+        const start = new Date(startTime);
+        const elapsed = Math.floor((now - start) / 60000); // minutes
+
+        if (elapsed < 0) return;
+
+        const hours = Math.floor(elapsed / 60);
+        const minutes = elapsed % 60;
+
+        badge.textContent = `In use: ${hours}h ${minutes}m`;
+    });
+
+    // Update idle table timers
+    document.querySelectorAll('.idle-timer-badge').forEach(badge => {
+        const idleTime = badge.getAttribute('data-idle-time');
+        if (!idleTime) return;
+
+        const lastAvailable = new Date(idleTime);
+        const elapsed = Math.floor((now - lastAvailable) / 60000); // minutes
+
+        if (elapsed < 0) return;
+
+        const hours = Math.floor(elapsed / 60);
+        const minutes = elapsed % 60;
+
+        badge.textContent = `Idle: ${hours}h ${minutes}m`;
+    });
+}
+</script>
