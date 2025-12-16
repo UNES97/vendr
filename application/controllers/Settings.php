@@ -83,7 +83,7 @@ class Settings extends CI_Controller {
         // Get application settings from database with defaults
         $data['app_name'] = $this->_get_setting('app_name', 'Restaurant POS System');
         $data['currency'] = $this->_get_setting('currency', 'PKR');
-        $data['timezone'] = $this->_get_setting('timezone', 'Asia/Karachi');
+        $data['timezone'] = $this->_get_setting('timezone', 'Africa/Casablanca');
         $data['language'] = $this->_get_setting('language', 'en');
         $data['date_format'] = $this->_get_setting('date_format', 'Y-m-d');
         $data['time_format'] = $this->_get_setting('time_format', 'H:i:s');

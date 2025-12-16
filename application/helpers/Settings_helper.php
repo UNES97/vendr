@@ -55,7 +55,7 @@ function get_currency()
  */
 function get_timezone()
 {
-    return setting('timezone', 'Asia/Karachi');
+    return setting('timezone', 'Africa/Casablanca');
 }
 
 /**

@@ -156,6 +156,7 @@
                             required
                             class="w-full select2-timezone"
                         >
+                            <option value="Africa/Casablanca" <?php echo $timezone === 'Africa/Casablanca' ? 'selected' : ''; ?>>Africa/Casablanca (WET)</option>
                             <option value="Asia/Karachi" <?php echo $timezone === 'Asia/Karachi' ? 'selected' : ''; ?>>Asia/Karachi (PKT)</option>
                             <option value="Asia/Dubai" <?php echo $timezone === 'Asia/Dubai' ? 'selected' : ''; ?>>Asia/Dubai (GST)</option>
                             <option value="Asia/Kolkata" <?php echo $timezone === 'Asia/Kolkata' ? 'selected' : ''; ?>>Asia/Kolkata (IST)</option>

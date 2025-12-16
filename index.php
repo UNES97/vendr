@@ -91,6 +91,22 @@ switch (ENVIRONMENT)
 
 /*
  *---------------------------------------------------------------
+ * SET DEFAULT TIMEZONE (FALLBACK)
+ *---------------------------------------------------------------
+ *
+ * Set the default timezone for PHP date/time functions.
+ * This is a FALLBACK - the actual timezone is set from the settings
+ * table via a hook after CodeIgniter loads.
+ *
+ * This initial setting prevents PHP warnings during early bootstrap.
+ *
+ * To change your timezone, go to: Settings > General Settings
+ * Or update the 'timezone' value in your settings table.
+ */
+	date_default_timezone_set('Africa/Casablanca');
+
+/*
+ *---------------------------------------------------------------
  * SYSTEM DIRECTORY NAME
  *---------------------------------------------------------------
  *

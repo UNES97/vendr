@@ -18,6 +18,7 @@ class Online_order extends CI_Controller {
         $this->load->model('Order_model');
         $this->load->model('Meal_model');
         $this->load->model('Table_model');
+        $this->load->model('Table_usage_session_model');
         // NO require_login() - public access for customers
     }
 
@@ -139,6 +140,13 @@ class Online_order extends CI_Controller {
 
             // Update table status if dine-in
             if ($order_type === 'dine-in' && !empty($input['table_id'])) {
+                // Calculate idle time before this session
+                $idle_minutes = $this->Table_usage_session_model->calculate_idle_time($input['table_id']);
+
+                // Start new session
+                $this->Table_usage_session_model->start_session($input['table_id'], $order_id, $idle_minutes);
+
+                // Update table status to occupied
                 $this->Table_model->update($input['table_id'], ['status' => 'occupied']);
             }
 

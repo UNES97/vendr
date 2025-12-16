@@ -92,7 +92,11 @@ class Pos extends CI_Controller {
                 $idle_minutes = $this->Table_usage_session_model->calculate_idle_time($order_data['table_id']);
 
                 // Start new session
-                $this->Table_usage_session_model->start_session($order_data['table_id'], $order_id, $idle_minutes);
+                $session_id = $this->Table_usage_session_model->start_session($order_data['table_id'], $order_id, $idle_minutes);
+
+                if (!$session_id) {
+                    log_message('error', 'Failed to create table usage session for table_id: ' . $order_data['table_id'] . ', order_id: ' . $order_id);
+                }
 
                 // Auto-update table status to occupied
                 $this->Table_model->update($order_data['table_id'], ['status' => 'occupied']);
